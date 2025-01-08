@@ -1,0 +1,4 @@
+,model,data,depth,epochs,val_accuracy,test_accuracy,drop_method,drop_rate
+0,UniSAGE,CocitationCora,8,500,0.4178348779678345,0.41939252614974976,dropnode,"tensor(0.0295, grad_fn=<MulBackward0>)"
+1,UniSAGE,CocitationCora,8,500,0.4057632386684418,0.4057632386684418,dropedge,"tensor(0.0331, grad_fn=<MulBackward0>)"
+2,UniSAGE,CocitationCora,8,500,0.4151090383529663,0.4236760139465332,drophyperedge,"tensor(0.0320, grad_fn=<MulBackward0>)"
