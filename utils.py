@@ -31,9 +31,6 @@ def load_dataset(name):
 
 def dirichlet_energy(G,X):
     dir_matrix = torch.mm(X.T, torch.mm(G.L_HGNN, X))
-    """M_min = dir_matrix.min()
-    M_max = dir_matrix.max()
-    dir_matrix_normalized = (dir_matrix - M_min) / (M_max - M_min)"""
     return dir_matrix.trace()/dir_matrix.shape[0]
 
 
