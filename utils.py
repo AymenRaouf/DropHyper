@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from dhg import Hypergraph
 import time
 import torch
+import matplotlib.pyplot as plt
 
 
 def load_dataset(name):
@@ -31,7 +32,24 @@ def load_dataset(name):
 
 def dirichlet_energy(G,X):
     dir_matrix = torch.mm(X.T, torch.mm(G.L_HGNN, X))
-    return dir_matrix.trace()/dir_matrix.shape[0]
+    return dir_matrix.trace()/len(dir_matrix)
+
+def dirichlet_energy_explicit(G, X):
+    total_v = 0
+    total_diff = 0
+    num_v = G.num_v
+    #print(G.deg_v)
+    for v in range(num_v):
+        e_neigh = G.nbr_e(v)
+        if len(e_neigh) != 0:
+            for e in e_neigh:
+                v_neigh = G.nbr_v(e)
+                for v_n in v_neigh:
+                    total_v += 1
+                    diff = X[v] - X[v_n]
+                    distance = torch.sqrt(torch.sum(diff**2))
+                    total_diff += distance
+    return total_diff/total_v
 
 
 def dropout_hgnn(method:str, rate:float, nodes:list, relations:list)->Hypergraph:    
@@ -42,20 +60,23 @@ def dropout_hgnn(method:str, rate:float, nodes:list, relations:list)->Hypergraph
         non_droped_relations = []
         for relation in relations:
             non_droped_relations.append(tuple(x for x in relation if x not in non_droped_nodes))
-        relations = non_droped_relations
+        new_relations = non_droped_relations
 
     # Dropping edges
     if method == 'dropedge' and rate != 0.0:
         non_droped_relations = []
         for relation in relations:
             non_droped_relations.append(tuple(x for x in relation if random() > rate))
-        relations = non_droped_relations
+        new_relations = non_droped_relations
 
     # Dropping hyperedges
     if method == 'drophyperedge' and rate != 0.0:
-        relations = [r for r in relations if random() > rate]
+        new_relations = [r for r in relations if random() > rate]
 
-    return Hypergraph(len(nodes), relations)
+    if method == "no dropout":
+        new_relations = relations
+
+    return Hypergraph(len(nodes), new_relations)
 
 
 def train(net, X, G, lbls, train_idx, optimizer, epoch):
@@ -64,22 +85,33 @@ def train(net, X, G, lbls, train_idx, optimizer, epoch):
     st = time.time()
     optimizer.zero_grad()
     outs = net(X, G)
-    energy = dirichlet_energy(G, outs)
+
+    # Show the plot
+    plt.show()
+    #energy = torch.sqrt(dirichlet_energy(G, outs))
+    
     outs, lbls = outs[train_idx], lbls[train_idx]
     loss = F.cross_entropy(outs, lbls)
     loss.backward()
     optimizer.step()
     print(f"Epoch: {epoch}, Time: {time.time()-st:.5f}s, Loss: {loss.item():.5f}")
-    return loss.item(), energy
+    return loss.item()
 
 
 @torch.no_grad()
-def infer(net, X, A, lbls, idx, evaluator, test=False):
+def infer(net, X, G, lbls, idx, evaluator, test=False):
     net.eval()
-    outs = net(X, A)
+    outs = net(X, G)
+    energy_explicit = torch.sqrt(dirichlet_energy_explicit(G, outs))
     outs, lbls = outs[idx], lbls[idx]
     if not test:
         res = evaluator.validate(lbls, outs)
     else:
         res = evaluator.test(lbls, outs)
-    return res
+    return res, energy_explicit
+
+
+def column2array(column):
+    values = list(filter(None, column.strip("[]\n").replace(",","").split(" ")))
+    values = [float(f) for f in values]
+    return values

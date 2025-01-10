@@ -44,7 +44,7 @@ class deepHGNN(nn.Module):
         """
         for layer in self.layers:
             X = layer(X, hg)
-        return X
+        return torch.nn.Softmax(X)
 
 
 
@@ -298,7 +298,7 @@ class deepUniSAGE(nn.Module):
         """
         for layer in self.layers:
             X = layer(X, hg)
-        return X
+        return torch.sigmoid(X)
 
 
 
@@ -396,18 +396,18 @@ class deepHNHN(nn.Module):
 def load_model(name, X, data, depth):
     match name:
         case 'HGNN':
-            return deepHGNN(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepHGNN(X.shape[1], data["num_classes"], depth)
         case 'HGNNP':
-            return deepHGNNP(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepHGNNP(X.shape[1], data["num_classes"], depth)
         case 'HyperGCN':
-            return deepHyperGCN(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepHyperGCN(X.shape[1], data["num_classes"], depth)
         case 'UniSAGE':
-            return deepUniSAGE(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepUniSAGE(X.shape[1], data["num_classes"], depth)
         case 'UniGCN':
-            return deepUniGCN(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepUniGCN(X.shape[1], data["num_classes"], depth)
         case 'UniGAT':
-            return deepUniGAT(X.shape[1], data["num_classes"], 2, depth, use_bn=True)
+            return deepUniGAT(X.shape[1], data["num_classes"], 2, depth)
         case 'UniGIN':
-            return deepUniGIN(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepUniGIN(X.shape[1], data["num_classes"], depth)
         case 'HNHN':
-            return deepHNHN(X.shape[1], data["num_classes"], depth, use_bn=True)
+            return deepHNHN(X.shape[1], data["num_classes"], depth)
