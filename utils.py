@@ -8,25 +8,24 @@ import matplotlib.pyplot as plt
 
 
 def load_dataset(name):
-    match name:
-        case 'CocitationCora':
-            return CocitationCora()
-        case 'CoauthorshipCora':
-            return CoauthorshipCora()
-        case 'CoauthorshipDBLP':
-            return CoauthorshipDBLP()
-        case 'CocitationCiteseer':
-            return CocitationCiteseer()
-        case 'CocitationPubmed':
-            return CocitationPubmed()
-        case 'Cooking200':
-            return Cooking200()
-        case 'News20':
-            return News20()
-        case 'Yelp3k':
-            return Yelp3k()
-        case 'Tencent2k':
-            return Tencent2k()
+    if name == 'CocitationCora':
+        return CocitationCora()
+    if name == 'CoauthorshipCora':
+        return CoauthorshipCora()
+    if name == 'CoauthorshipDBLP':
+        return CoauthorshipDBLP()
+    if name == 'CocitationCiteseer':
+        return CocitationCiteseer()
+    if name == 'CocitationPubmed':
+        return CocitationPubmed()
+    if name == 'Cooking200':
+        return Cooking200()
+    if name == 'News20':
+        return News20()
+    if name == 'Yelp3k':
+        return Yelp3k()
+    if name == 'Tencent2k':
+        return Tencent2k()
     
 
 
@@ -49,6 +48,8 @@ def dirichlet_energy_explicit(G, X):
                     diff = X[v] - X[v_n]
                     distance = torch.sqrt(torch.sum(diff**2))
                     total_diff += distance
+    if total_v == 0:
+        return torch.Tensor([0]) 
     return total_diff/total_v
 
 
@@ -73,7 +74,7 @@ def dropout_hgnn(method:str, rate:float, nodes:list, relations:list)->Hypergraph
     if method == 'drophyperedge' and rate != 0.0:
         new_relations = [r for r in relations if random() > rate]
 
-    if method == "no dropout":
+    if method == "no dropout" or rate == 0.0:
         new_relations = relations
 
     return Hypergraph(len(nodes), new_relations)

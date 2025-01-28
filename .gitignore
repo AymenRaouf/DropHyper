@@ -2,6 +2,10 @@ drophyper/
 Data/
 Main_bis.ipynb
 Main.ipynb
-models.py
 models_bis.ipynb
-Test.ipynb
+send_info.sh
+launch_jobs.sh
+run.sh
+get_info.sh
+utils_bis.py
+utils_ter.py
